@@ -1,0 +1,8 @@
+{
+  "name": "Extend Panel Right Box",
+  "description": "Extend the top bar's right box so my indicators don't get fucking truncated",
+  "uuid": "Extend_Panel_Right_Box@loamtop",
+  "shell-version": [
+    "3.26.1"
+  ]
+}
