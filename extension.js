@@ -1,30 +1,36 @@
+// See https://github.com/hardpixel/unite-shell/blob/0f0ce42543ce417840f6005864ad9f2fcce2bff3/unite%40hardpixel.eu/modules/extendLeftBox.js
 
-const St = imports.gi.St;
 const Clutter = imports.gi.Clutter;
+const Gi = imports._gi;
 const Main = imports.ui.main;
 
-let panelConnectId;
+let old_vfunc_allocate;
 
 function init() {
 }
 
 function enable() {
-    panelConnectId = Main.panel.actor.connect('allocate', allocate);
+    old_vfunc_allocate = Main.panel.__proto__.vfunc_allocate;
+
+    Main.panel.__proto__[Gi.hook_up_vfunc_symbol]('allocate', (box, flags) => {
+        Main.panel.vfunc_allocate.call(Main.panel, box, flags);
+        vfunc_allocate(box, flags);
+    });
 }
 
 function disable() {
-    Main.panel.actor.disconnect(panelConnectId);
+    Main.panel.__proto__[Gi.hook_up_vfunc_symbol]('allocate', old_vfunc_allocate);
 }
 
-let allocate = (actor, box, flags) => {
-    let allocWidth = box.x2 - box.x1;
-    let allocHeight = box.y2 - box.y1;
+const vfunc_allocate = (box, flags) => {
+    const allocWidth = box.x2 - box.x1;
+    const allocHeight = box.y2 - box.y1;
 
-    let [, leftNaturalWidth] = Main.panel._leftBox.get_preferred_width(-1);
-    let [, rightNaturalWidth] = Main.panel._rightBox.get_preferred_width(-1);
+    const [, leftNaturalWidth] = Main.panel._leftBox.get_preferred_width(-1);
+    const [, rightNaturalWidth] = Main.panel._rightBox.get_preferred_width(-1);
 
-    let leftBoxWidth = Math.min(Math.floor(allocWidth / 5), leftNaturalWidth);
-    let rightBoxWidth = Math.min(allocWidth - leftBoxWidth, rightNaturalWidth);
+    const leftBoxWidth = Math.min(Math.floor(allocWidth * 0.01), leftNaturalWidth);
+    const rightBoxWidth = Math.min(allocWidth - leftBoxWidth, rightNaturalWidth);
 
     let childBox = new Clutter.ActorBox();
 
